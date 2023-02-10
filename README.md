@@ -14,8 +14,12 @@ Chromedriver
 Install the required packages by running pip install -r requirements.txt
 Start the Flask app by running python api_main.py
 You can access the scraped data by sending a GET request to the following endpoints:
+```
 /api/data/quizlet/<string:url>
+```
+```
 /api/data/brainscape/<string:url>
+```
 Note: The URL should be base64 encoded to prevent issues with special characters in the URL.
 Note: The request can take up too 20 seconds
 
