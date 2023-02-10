@@ -10,8 +10,7 @@ import base64
 app = Flask(__name__)
 
 
-@app.route("/api/data/quizlet/<string:url>", methods=["GET"])
-def get_quizlet_data(url):
+def create_driver():
     # load chrome driver
     options = Options()
     options.add_argument(
@@ -19,15 +18,22 @@ def get_quizlet_data(url):
         "Chrome/84.0.4147.125"
         "Safari/537.36 "
     )
-    # options.add_argument("--headless")
+    options.add_argument("--headless")
     options.add_argument("--silent")
     options.add_argument("log-level=3")
     options.add_experimental_option("excludeSwitches", ["enable-logging"])
 
     driver = webdriver.Chrome(options=options)
     driver.set_window_size(1800, 1080)
+    return driver
+
+
+@app.route("/api/data/quizlet/<string:url>", methods=["GET"])
+def get_quizlet_data(url):
+    driver = create_driver()
 
     url = base64.urlsafe_b64decode(url.encode()).decode()
+    print(f"Getting quizlet data from {url}")
 
     # load page
     driver.get(url)
@@ -54,7 +60,7 @@ def get_quizlet_data(url):
     )
 
     driver.execute_script("window.scrollTo(0, 500)")
-    sleep(2)
+    sleep(1)
 
     # dict to store questions and answers
     questions = {}
@@ -96,22 +102,10 @@ def get_quizlet_data(url):
 
 @app.route("/api/data/brainscape/<string:url>", methods=["GET"])
 def get_brainscape_data(url):
-    # load chrome driver
-    options = Options()
-    options.add_argument(
-        "user-agent=Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/84.0.4147.125"
-        "Safari/537.36 "
-    )
-    options.add_argument("--headless")
-    options.add_argument("--silent")
-    options.add_argument("log-level=3")
-    options.add_experimental_option("excludeSwitches", ["enable-logging"])
-
-    driver = webdriver.Chrome(options=options)
-    driver.set_window_size(1800, 1080)
+    driver = create_driver()
 
     url = base64.urlsafe_b64decode(url.encode()).decode()
+    print(f"Getting brainscape data from {url}")
 
     # load page
     driver.get(url)
@@ -121,23 +115,18 @@ def get_brainscape_data(url):
         ec.presence_of_element_located((By.CLASS_NAME, "smart-card-row"))
     )
 
-    sleep(2)
+    sleep(1)
 
     # get all cards
     elements = driver.find_element(
         By.XPATH, "/html/body/div[2]/div[1]/div[2]/div/div[3]/div[2]"
     ).find_elements(By.CLASS_NAME, "smart-card-row")
 
-    print(f"Number of cards: {len(elements)}")
-
     # dict to store questions and answers
     questions = {}
 
     for element in elements:
         element = element.find_element(By.XPATH, "./section")
-
-        # print element class name
-        print(element.get_attribute("class"))
 
         question = element.find_element(
             By.XPATH,
@@ -159,5 +148,69 @@ def get_brainscape_data(url):
     return jsonify(questions)
 
 
+@app.route("/api/data/cram/<string:url>", methods=["GET"])
+def get_cram_data(url):
+    driver = create_driver()
+
+    url = base64.urlsafe_b64decode(url.encode()).decode()
+    print(f"Getting cram data from {url}")
+
+    # load page
+    driver.get(url)
+
+    # wait for page to load
+    WebDriverWait(driver, 30).until(
+        ec.presence_of_element_located((By.CLASS_NAME, "card"))
+    )
+
+    sleep(1)
+
+    number_of_cards = (
+        int(
+            driver.find_element(
+                By.XPATH, """//*[@id="tablePagination_totalPages"]"""
+            ).text
+        )
+        * 10
+    )
+
+    elements = []
+    for i in range(number_of_cards):
+        try:
+            element = driver.find_element(By.XPATH, f"""//*[@id="row{i + 1}"]""")
+            elements.append(element)
+        except:
+            break
+
+    # dict to store questions and answers
+    questions = {}
+
+    for element in elements:
+        question = element.find_element(
+            By.CLASS_NAME,
+            "question",
+        ).text
+
+        answer = element.find_element(
+            By.CLASS_NAME,
+            "answer",
+        ).text
+
+        if question != "":
+            print(f"Question: {question}")
+            print(f"Answer: {answer}")
+            questions[question] = answer
+
+    driver.quit()
+
+    return jsonify(questions)
+
+
+@app.route("/api/data/ping/", methods=["GET"])
+def ping():
+    print("ping")
+    return jsonify({"status": "success"})
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=8080)
