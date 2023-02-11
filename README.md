@@ -1,5 +1,10 @@
 ## Introduction
-This is a Flask app that scrapes quizlet and brainscape websites to extract questions and answers data. The scraped data is returned as a JSON response.
+This is a Flask app that scrapes quizlet and brainscape websites to extract questions and answers data. The scraped data is returned as a JSON response. The supported platforms are the following:
+```
+https://quizlet.com/
+https://www.brainscape.com/flashcards
+https://www.cram.com/flashcards
+```
 
 ## Requirements
 To run the code, you will need:

@@ -1,4 +1,3 @@
-from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
@@ -6,6 +5,7 @@ from selenium.webdriver.support import expected_conditions as ec
 from time import sleep
 from flask import Flask, jsonify
 import base64
+import undetected_chromedriver as uc
 
 app = Flask(__name__)
 
@@ -13,17 +13,9 @@ app = Flask(__name__)
 def create_driver():
     # load chrome driver
     options = Options()
-    options.add_argument(
-        "user-agent=Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/84.0.4147.125"
-        "Safari/537.36 "
-    )
     options.add_argument("--headless")
-    options.add_argument("--silent")
-    options.add_argument("log-level=3")
-    options.add_experimental_option("excludeSwitches", ["enable-logging"])
 
-    driver = webdriver.Chrome(options=options)
+    driver = uc.Chrome(options=options)
     driver.set_window_size(1800, 1080)
     return driver
 
@@ -208,9 +200,8 @@ def get_cram_data(url):
 
 @app.route("/api/data/ping/", methods=["GET"])
 def ping():
-    print("ping")
     return jsonify({"status": "success"})
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=8080)
+    app.run(debug=True, port=15202)
