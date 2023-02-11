@@ -11,21 +11,17 @@ app = Flask(__name__)
 
 
 def create_driver():
-    # load chrome driver
-    options = Options()
-    options.add_argument("--headless")
-
-    driver = uc.Chrome(options=options)
+    driver = uc.Chrome()
     driver.set_window_size(1800, 1080)
     return driver
 
 
 @app.route("/api/data/quizlet/<string:url>", methods=["GET"])
 def get_quizlet_data(url):
-    driver = create_driver()
-
     url = base64.urlsafe_b64decode(url.encode()).decode()
     print(f"Getting quizlet data from {url}")
+
+    driver = create_driver()
 
     # load page
     driver.get(url)
@@ -94,10 +90,10 @@ def get_quizlet_data(url):
 
 @app.route("/api/data/brainscape/<string:url>", methods=["GET"])
 def get_brainscape_data(url):
-    driver = create_driver()
-
     url = base64.urlsafe_b64decode(url.encode()).decode()
     print(f"Getting brainscape data from {url}")
+
+    driver = create_driver()
 
     # load page
     driver.get(url)
@@ -142,10 +138,10 @@ def get_brainscape_data(url):
 
 @app.route("/api/data/cram/<string:url>", methods=["GET"])
 def get_cram_data(url):
-    driver = create_driver()
-
     url = base64.urlsafe_b64decode(url.encode()).decode()
     print(f"Getting cram data from {url}")
+
+    driver = create_driver()
 
     # load page
     driver.get(url)
@@ -204,4 +200,4 @@ def ping():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=15202)
+    app.run(debug=True, port=15204)
