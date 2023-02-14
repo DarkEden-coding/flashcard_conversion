@@ -7,6 +7,7 @@ https://www.cram.com/flashcards
 ```
 
 ## Requirements
+---NOTE: Headless is NOT supported, py virtual display can be used on linux as a replacement---
 To run the code, you will need:
 
 ```
